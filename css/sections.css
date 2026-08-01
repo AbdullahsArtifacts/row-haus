@@ -1,626 +1,292 @@
-/* ROW Haus — below-the-fold sections. Depends on tokens in css/styles.css. */
+/* ROW Haus — content sections below the scene */
 
-/* ==========================================================================
-   0. Content shell
-   ========================================================================== */
-
-/* The hero canvas is position:fixed behind everything, so this layer needs both
-   a stacking context above it AND an opaque fill — a transparent background
-   would let the sequence bleed through the whole lower page. */
-.content {
+.section {
   position: relative;
-  z-index: 2;
-  background: var(--abyss);
-  color: var(--bone);
+  z-index: 10;
+  background: var(--ink);
+  padding: clamp(5rem, 14vh, 10rem) var(--gutter);
 }
 
-/* Scoped border-box rather than a global reset: these sections all pad their own
-   boxes, and this file must not depend on what reset styles.css happens to ship. */
-.stats, .classes, .membership, .closer, .site-footer,
-.stats *, .classes *, .membership *, .closer *, .site-footer *,
-.stats *::before, .classes *::before, .membership *::before,
-.closer *::before, .site-footer *::before {
-  box-sizing: border-box;
+.section--method {
+  background: linear-gradient(to bottom, var(--fjord-deep), var(--ink) 60%);
 }
 
-/* Shared measure. Applied to inner wrappers rather than the <section> itself so
-   full-bleed hairlines can still run edge to edge. */
-.stats-inner,
-.section-head,
-.class-grid,
-.tier-grid,
-.closer-inner,
-.footer-inner,
-.footer-base {
-  width: 100%;
-  max-width: 1280px;
-  margin-inline: auto;
-}
-
-.content section,
-.site-footer {
-  padding-inline: var(--gutter);
-}
-
-/* ==========================================================================
-   1. Shared editorial type
-   ========================================================================== */
+.section__head { max-width: 62rem; margin: 0 auto clamp(3rem, 8vh, 5rem); }
 
 .eyebrow {
+  margin: 0 0 1.25rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--oak);
+}
+
+.section h2 {
+  font-size: clamp(2.25rem, 6.5vw, 5rem);
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--foam);
 }
 
-.section-title {
-  margin: 0.75rem 0 0;
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(2.125rem, 5.4vw, 3.9rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  color: var(--bone);
-  text-wrap: balance;
+.lede {
+  max-width: 42rem;
+  margin: 1.75rem 0 0;
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  color: rgba(238, 241, 238, 0.72);
 }
 
-.section-intro {
-  margin: 1.25rem 0 0;
-  max-width: 46ch;
-  font-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
-  line-height: 1.65;
-  color: var(--bone-dim);
-}
+/* --------------------------------------------------------------- method */
 
-.section-head {
-  margin-bottom: clamp(2.75rem, 6vw, 5rem);
-}
-
-/* ==========================================================================
-   2. Stats
-   ========================================================================== */
-
-.stats {
-  padding-block: clamp(3.5rem, 8vw, 6.5rem);
-  border-bottom: 1px solid var(--rule);
-}
-
-.stats-inner {
+.method-grid {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 62rem;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(1.75rem, 4vw, 3.5rem);
-}
-
-/* A rule above each stat instead of dividers between them: it survives any
-   wrap/column count without orphaned borders at the row edges. */
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 1.125rem;
-  border-top: 1px solid var(--rule);
-}
-
-.stat-num {
-  font-family: var(--font-serif);
-  font-size: clamp(2.375rem, 5.6vw, 4rem);
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-  color: var(--bone);
-  font-variant-numeric: lining-nums tabular-nums;
-}
-
-.stat-label {
-  font-size: 0.6875rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--bone-faint);
-}
-
-/* ==========================================================================
-   3. Classes
-   ========================================================================== */
-
-.classes {
-  padding-block: clamp(4.5rem, 11vw, 9rem);
-}
-
-.class-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 1px;
-  background: var(--rule); /* gap fill = the hairline grid between cards */
-  border: 1px solid var(--rule);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  background: rgba(238, 241, 238, 0.12);
+  border: 1px solid rgba(238, 241, 238, 0.12);
 }
 
-/* Cards share hairlines via the 1px grid gap above, so no per-card borders —
-   avoids the doubled 2px seams you get from adjacent bordered boxes. */
-.class-card {
-  position: relative;
-  overflow: hidden; /* clips the ghost numeral where it bleeds past the corner */
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: clamp(1.75rem, 3vw, 2.75rem);
-  background: var(--abyss);
-  transition: background var(--dur) var(--ease);
+.method-grid li {
+  background: var(--ink);
+  padding: clamp(1.75rem, 3vw, 2.5rem);
 }
 
-.class-card:hover {
-  background: var(--deep);
-}
-
-.class-card-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.class-name {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(1.5rem, 2.2vw, 1.875rem);
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-  color: var(--bone);
-}
-
-.class-dur {
-  flex: none;
-  font-size: 0.6875rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--foam);
+.method-grid__num {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: var(--stone);
+  margin-bottom: 1.5rem;
   font-variant-numeric: tabular-nums;
 }
 
-.class-desc {
-  margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.65;
-  color: var(--bone-dim);
+.method-grid h3 {
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.85rem;
 }
 
-.class-specs {
-  margin: 0;
-  /* Auto top margin pins the spec list to the card bottom so lists of unequal
-     length still align across the row. */
-  margin-top: auto;
-  padding: 0;
-  list-style: none;
+.method-grid p { margin: 0; color: rgba(238, 241, 238, 0.66); font-size: 0.95rem; }
+
+/* --------------------------------------------------------------- classes */
+
+.section--classes { background: var(--fjord-deep); }
+
+.class-list {
+  max-width: 62rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+}
+
+.class-card {
+  border: 1px solid rgba(238, 241, 238, 0.16);
+  border-radius: 4px;
+  padding: clamp(1.75rem, 3vw, 2.5rem);
   display: flex;
   flex-direction: column;
-  gap: 0.6875rem;
+  gap: 1.1rem;
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
 }
 
-.class-specs li {
-  display: flex;
-  align-items: baseline;
-  gap: 0.875rem;
-  font-size: 0.8125rem;
+.class-card:hover { border-color: rgba(238, 241, 238, 0.4); transform: translateY(-3px); }
+.class-card--hard { border-color: rgba(192, 138, 78, 0.5); }
+
+.class-card header { display: flex; flex-direction: column; gap: 0.5rem; }
+.class-card h3 { font-size: clamp(1.75rem, 3vw, 2.25rem); }
+
+.class-card__meta {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--oak);
+}
+
+.class-card p { margin: 0; color: rgba(238, 241, 238, 0.7); font-size: 0.95rem; }
+
+.class-card__foot {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(238, 241, 238, 0.12);
+  font-size: 0.78rem !important;
   letter-spacing: 0.04em;
-  color: var(--bone-dim);
+  color: rgba(238, 241, 238, 0.55) !important;
 }
 
-.class-specs li::before {
-  content: "";
-  flex: none;
-  width: 1rem;
-  height: 1px;
-  background: var(--water);
-  transform: translateY(-0.3em); /* optical: aligns the dash to x-height, not baseline */
-}
+/* --------------------------------------------------------------- tiers */
 
-.class-index {
-  position: absolute;
-  right: -0.5rem;
-  bottom: -1.75rem;
-  font-family: var(--font-serif);
-  font-size: clamp(6rem, 11vw, 9rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
-  color: var(--bone);
-  opacity: 0.05;
-  pointer-events: none;
-  user-select: none;
-  transition: opacity var(--dur) var(--ease);
-}
-
-.class-card:hover .class-index {
-  opacity: 0.09;
-}
-
-/* ==========================================================================
-   4. Membership
-   ========================================================================== */
-
-.membership {
-  padding-block: clamp(4.5rem, 11vw, 9rem);
-  border-top: 1px solid var(--rule);
-}
-
-.tier-grid {
+.tiers {
+  max-width: 66rem;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(1rem, 1.6vw, 1.5rem);
-  align-items: stretch;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  align-items: start;
 }
 
 .tier {
   position: relative;
+  border: 1px solid rgba(238, 241, 238, 0.16);
+  border-radius: 4px;
+  padding: clamp(1.75rem, 3vw, 2.5rem);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: clamp(2rem, 3vw, 2.75rem);
-  border: 1px solid var(--rule);
-  background: transparent;
-  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
-.tier:hover {
-  border-color: var(--fjord);
-  background: var(--deep);
+.tier--featured {
+  border-color: var(--oak);
+  background: linear-gradient(to bottom, rgba(192, 138, 78, 0.09), transparent 55%);
 }
 
-/* Featured tier reads as elevated through surface + border weight rather than a
-   transform — scaling one grid child would break the shared baseline grid. */
-.tier.is-featured {
-  background: var(--deep);
-  border-color: var(--fjord);
+.tier__flag {
+  position: absolute;
+  top: -0.7rem;
+  left: clamp(1.75rem, 3vw, 2.5rem);
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  background: var(--oak);
+  color: var(--ink);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 999px;
 }
 
-.tier.is-featured::before {
+.tier h3 { font-size: 1.5rem; }
+
+.tier__price {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.tier__price span {
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--stone);
+  margin-left: 0.4rem;
+}
+
+.tier ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+
+.tier li {
+  position: relative;
+  padding-left: 1.35rem;
+  font-size: 0.9rem;
+  color: rgba(238, 241, 238, 0.72);
+}
+.tier li::before {
   content: "";
   position: absolute;
-  inset: -1px -1px auto;
-  height: 2px;
-  background: var(--oar);
-}
-
-.tier-badge {
-  align-self: flex-start;
-  font-size: 0.625rem;
-  /* Pinned line-height, not inherited: the offset below is computed from it, so
-     it must not drift with whatever body line-height styles.css sets. */
-  line-height: 1.2;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--oar);
-}
-
-/* Keeps the name on a common line across all three cards even though only the
-   featured one carries a badge. Offset = badge box + the column gap it sits in. */
-.tier:not(.is-featured) .tier-name {
-  margin-top: calc(0.625rem * 1.2 + 1.5rem);
-}
-
-.tier-name {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(1.375rem, 2vw, 1.75rem);
-  letter-spacing: -0.01em;
-  color: var(--bone);
-}
-
-.tier-price {
-  display: flex;
-  align-items: baseline;
-  gap: 0.375rem;
-  margin: 0;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.tier-amount {
-  font-family: var(--font-serif);
-  font-size: clamp(2.25rem, 4vw, 3rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--bone);
-  font-variant-numeric: lining-nums tabular-nums;
-}
-
-.tier-per {
-  font-size: 0.8125rem;
-  letter-spacing: 0.12em;
-  color: var(--bone-faint);
-}
-
-.tier-desc {
-  margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: var(--bone-dim);
-}
-
-.tier-feats {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.tier-feats li {
-  display: flex;
-  align-items: baseline;
-  gap: 0.875rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--bone-dim);
-}
-
-.tier-feats li::before {
-  content: "";
-  flex: none;
+  left: 0;
+  top: 0.62em;
   width: 0.5rem;
   height: 1px;
-  background: var(--water);
-  transform: translateY(-0.3em);
+  background: var(--oak);
 }
 
-/* Auto margin bottom-aligns every CTA regardless of feature-list length. */
-.tier-cta {
-  margin-top: auto;
-  padding: 1.0625rem 1.5rem;
-  border: 1px solid var(--rule);
-  text-align: center;
-  font-size: 0.6875rem;
+.tier .btn { align-self: start; margin-top: auto; }
+
+/* --------------------------------------------------------------- studio */
+
+.section--studio {
+  background: linear-gradient(to bottom, var(--ink), var(--fjord-deep));
+}
+
+.studio-grid {
+  max-width: 66rem;
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.studio-facts {
+  margin: 0;
+  display: grid;
+  gap: 1.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  align-self: end;
+}
+
+.studio-facts dt {
+  font-size: 0.68rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  text-decoration: none;
-  color: var(--bone);
-  background: transparent;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
-    border-color var(--dur) var(--ease);
+  color: var(--oak);
+  margin-bottom: 0.6rem;
 }
 
-.tier-cta:hover,
-.tier-cta:focus-visible {
-  background: var(--bone);
-  border-color: var(--bone);
-  color: var(--abyss);
+.studio-facts dd {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(238, 241, 238, 0.78);
+  line-height: 1.55;
 }
 
-.is-featured .tier-cta {
-  border-color: var(--water);
-}
-
-.is-featured .tier-cta:hover,
-.is-featured .tier-cta:focus-visible {
-  background: var(--oar);
-  border-color: var(--oar);
-  color: var(--abyss);
-}
-
-/* ==========================================================================
-   5. Closing CTA
-   ========================================================================== */
-
-.closer {
-  padding-block: clamp(6rem, 15vw, 12rem);
-  border-top: 1px solid var(--rule);
-  text-align: center;
-}
-
-.closer-inner {
-  max-width: 52rem;
-}
-
-.closer-statement {
-  margin: 1.5rem 0 clamp(2.5rem, 5vw, 3.5rem);
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(1.875rem, 5vw, 3.5rem);
-  line-height: 1.1;
+.studio-close {
+  max-width: 66rem;
+  margin: clamp(4rem, 12vh, 8rem) auto 0;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(238, 241, 238, 0.14);
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 300;
   letter-spacing: -0.02em;
-  color: var(--bone);
-  text-wrap: balance;
+  color: rgba(238, 241, 238, 0.62);
 }
 
-.closer-cta {
-  display: inline-block;
-  padding: 1.25rem clamp(2.25rem, 5vw, 3.5rem);
-  border: 1px solid var(--foam);
-  font-size: 0.75rem;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: var(--bone);
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
-    border-color var(--dur) var(--ease);
-}
-
-.closer-cta:hover,
-.closer-cta:focus-visible {
-  background: var(--oar);
-  border-color: var(--oar);
-  color: var(--abyss);
-}
-
-.closer-note {
-  margin: 1.75rem 0 0;
-  font-size: 0.75rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--bone-faint);
-}
-
-/* ==========================================================================
-   6. Footer
-   ========================================================================== */
+/* --------------------------------------------------------------- footer */
 
 .site-footer {
-  padding-block: clamp(3.5rem, 7vw, 5.5rem) 0;
-  border-top: 1px solid var(--rule);
-  background: var(--deep); /* one step up from --abyss to close the page */
-}
-
-.footer-inner {
-  display: grid;
-  grid-template-columns: 1.7fr repeat(4, 1fr);
-  gap: clamp(2rem, 4vw, 3rem);
-  padding-bottom: clamp(3rem, 6vw, 4.5rem);
-}
-
-.footer-mark {
-  display: block;
-  font-family: var(--font-serif);
-  font-size: clamp(1.25rem, 2vw, 1.625rem);
-  letter-spacing: 0.06em;
-  color: var(--bone);
-}
-
-.footer-tag {
-  margin: 0.75rem 0 0;
-  max-width: 24ch;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--bone-dim);
-}
-
-.footer-col-title {
-  margin: 0 0 1.125rem;
-  font-size: 0.625rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--foam);
-}
-
-.footer-line {
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--bone-dim);
-  overflow-wrap: anywhere; /* email + phone strings must not push the page wide at 360px */
-}
-
-/* Block, so consecutive links in a column stack the way the sibling <p>
-   .footer-line elements do — inline-block ran them together on one line.
-   fit-content keeps the hit area (and the focus ring) on the text rather
-   than spanning the whole column. */
-.footer-link {
-  display: block;
-  width: -moz-fit-content;
-  width: fit-content;
-  max-width: 100%;
-  text-decoration: none;
-  color: var(--bone-dim);
-  transition: color var(--dur) var(--ease);
-}
-
-.footer-link:hover,
-.footer-link:focus-visible {
-  color: var(--bone);
-}
-
-.footer-base {
+  position: relative;
+  z-index: 10;
+  background: var(--fjord-deep);
+  padding: 3rem var(--gutter);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
-  justify-content: space-between;
-  padding-block: 1.5rem clamp(1.5rem, 3vw, 2.25rem);
-  border-top: 1px solid var(--rule);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--bone-faint);
+  align-items: center;
+  gap: 1rem 2.5rem;
+  border-top: 1px solid rgba(238, 241, 238, 0.1);
 }
 
-/* ==========================================================================
-   7. Focus
-   ========================================================================== */
+.site-footer p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(238, 241, 238, 0.55);
+}
+.site-footer__fine { margin-left: auto !important; }
 
-.tier-cta:focus-visible,
-.closer-cta:focus-visible,
-.footer-link:focus-visible {
-  outline: 1px solid var(--oar);
-  outline-offset: 4px;
+@media (max-width: 720px) {
+  .site-footer__fine { margin-left: 0 !important; }
 }
 
-/* ==========================================================================
-   8. Scroll reveal (JS toggles .is-in)
-   ========================================================================== */
-
-.reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
-}
-
-.reveal.is-in {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .reveal.is-in {
-    opacity: 1;
-    transform: none;
-    transition: none;
+/* Section reveal — CSS-only, and never leaves content hidden where the
+   scroll-driven timeline isn't supported. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section__head,
+    .method-grid li,
+    .class-card,
+    .tier,
+    .studio-grid > *,
+    .studio-close {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 26%;
+    }
   }
 }
 
-/* ==========================================================================
-   9. Responsive
-   ========================================================================== */
-
-@media (max-width: 1080px) {
-  .footer-inner {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .footer-brand {
-    grid-column: 1 / -1;
-    padding-bottom: 0.5rem;
-  }
-}
-
-@media (max-width: 760px) {
-  .class-grid,
-  .tier-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stats-inner {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .footer-inner {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  /* Badge offset only exists to align cards side by side; stacked, it's dead space. */
-  .tier:not(.is-featured) .tier-name {
-    margin-top: 0;
-  }
-
-  .class-index {
-    font-size: 6.5rem;
-  }
-}
-
-@media (max-width: 460px) {
-  .stats-inner {
-    grid-template-columns: 1fr;
-  }
-
-  .footer-inner {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .footer-base {
-    justify-content: flex-start;
-  }
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: none; }
 }

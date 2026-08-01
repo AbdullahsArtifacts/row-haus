@@ -1,189 +1,101 @@
 # ROW Haus — scroll-driven image sequence
 
-Single-page site for an indoor rowing studio. The hero is a 120-frame image
-sequence (a crew rowing a wooden boat through a Norwegian fjord) painted to a
-canvas and indexed off scroll position, with Lenis smoothing the scroll.
-
-Runs offline. No build step, no bundler, no CDN, no web fonts, no dependencies
-beyond a vendored copy of Lenis. Open `index.html` directly, or serve the folder:
+Single-page site for an indoor rowing studio. The hero is a 300-frame canvas
+image sequence of a crew rowing a longboat through a fjord, scrubbed by scroll
+position. Plain HTML/CSS/JS, no build step, runs offline from a static server.
 
 ```bash
-python -m http.server 5179
+python -m http.server 5181 --directory "C:\Users\user\OneDrive\Desktop\CC-Folder\websites\projects\row-haus-scroll"
 ```
 
-> **This is a demo, not a real business.** ROW Haus is invented. The studio, the
-> address in Bergen, the phone number, the prices and the membership tiers are
-> all fabricated placeholder copy for a portfolio piece. Don't call the number
-> and don't try to book a class.
-
-**Hero footage:** the frames are stills from an AI-generated video clip. They are
-included so the demo runs standalone — check the terms of whatever generated a
-clip before reusing these frames in your own work. The interesting part of this
-repo is the renderer, not the footage.
-
-The techniques here are meant to be lifted for any scroll-driven sequence:
-crop-limited focus-anchored fitting, an upscale ceiling with a blurred backdrop
-fill, sub-frame crossfading, and a dirty-flag draw loop. See
-[The fit](#the-fit) and [Performance notes](#performance-notes).
+Also registered as `row-haus-scroll` in `.claude/launch.json` (port 5181).
 
 ## Files
 
-| Path | What it owns |
+| Path | What it is |
 | --- | --- |
-| `index.html` | Structure and all copy |
-| `js/sequence.js` | `window.FrameSequence` — preload, fit, crossfade, draw loop |
-| `js/main.js` | Lenis, preload gating, scroll → progress, overlays, reveals |
-| `css/styles.css` | Tokens, reset, preloader, fixed hero stage, overlays |
-| `css/sections.css` | Below-the-fold sections (stats, classes, tiers, footer) |
-| `frames/` | 120 WebPs, `frame-001.webp` … `-120.webp`, 720×1280 |
-| `lib/lenis.min.js` | Lenis v1.1.18, vendored |
-| `context/copy-deck.md` | Brand voice + every on-page string |
-| `build-single-file.py` | Bundles the whole build into one portable HTML |
+| `index.html` | Markup. Script order matters: lenis → sequence → main. |
+| `css/styles.css` | Base, header, loader, the scene and its overlay beats. |
+| `css/sections.css` | Content sections below the scene. |
+| `js/sequence.js` | `FrameSequence` — preloading and canvas drawing. |
+| `js/main.js` | Lenis, the rAF loop, scroll progress, beats, loader. |
+| `lib/lenis.min.js` | Lenis 1.1.18 UMD (`globalThis.Lenis`). Vendored, no CDN. |
+| `frames/` | `ezgif-frame-001.jpg` … `-300.jpg`, 720×1280, ~11 MB total. |
 
-## Single-file build
+## How it works
 
-`Desktop/user interface/rowing.html` is a self-contained copy — both
-stylesheets, Lenis, the engine, the boot layer and all 50 frames (as base64
-data URIs) inlined into one **16.2 MB** file that opens by double-clicking.
+**Preload.** All 300 frames load up front through a 12-at-a-time queue, each
+with `img.decode()` so no decode happens mid-scroll. `decode()` rejections fall
+back to the `onload` path — one failure never aborts the batch. Scrolling is
+blocked (`lenis.stop()` + `overflow: hidden`) until every frame is in.
 
-The bundler discovers the frame set from disk and validates it is a contiguous
-`1..N` run with no zero-byte files, so a regenerated sequence of any length is
-picked up whole. It also asserts that `FRAME_COUNT_FULL` in `js/main.js` matches
-the number of frames on disk — the browser can't enumerate a directory, so that
-constant is the one place still coupled to the frame set, and a mismatch would
-otherwise ship a build indexing frames that don't exist.
+**Sync.** One rAF loop drives `lenis.raf()` and the sequence together — never
+two loops. It reads layout once per tick, derives progress from `#scene`'s
+rect, and maps it to `round(p * 299)`. `render()` returns early when neither
+the frame index nor the canvas size changed, so a tick with no new frame costs
+nothing.
 
-```bash
-python websites/projects/row-haus/build-single-file.py
-```
+**Draw quality.** The source is portrait (720×1280) and the viewport usually
+isn't. Full-bleed `cover` on a 1280px-wide desktop would be a 1.78× upscale and
+on a 1512px screen 3.1× — that upscale, not the encoding, is what makes this
+footage look mushy. So:
 
-**This folder is the source of truth.** Edit here, then re-run the script;
-edits made directly to `rowing.html` are lost on the next build. Every
-substitution in the script is asserted and the output is scanned for surviving
-`css/`, `js/`, `lib/` or `frames/` references, so a silent miss fails the build
-instead of shipping a half-loading file.
+- the sharp layer's scale is capped at **1.6×** (`maxUpscale`);
+- the vertical crop is anchored at **`focusY: 0.56`**, because the boat sits
+  below the midline and a centred crop shows empty water;
+- the remainder is filled by a second, blurred canvas of the same frame;
+- the sharp layer's edges are feathered with `destination-out` gradients so the
+  seam against the backdrop disappears.
 
-Data URIs are same-origin, so `createImageBitmap` still succeeds and the single
-file keeps the fast draw path — unlike relative `file://` images, which taint
-the canvas and fall back to `HTMLImageElement`.
+The backdrop canvas is laid out **small** (320px) and CSS `transform: scale()`d
+up. A CSS filter is evaluated in the element's own coordinate space, so blurring
+a small element is both far cheaper and gives the correct visual radius.
 
-## How the scroll mapping works
+On narrow/portrait viewports the cover scale is under the cap, the sharp layer
+fills the screen, and the backdrop is simply never visible.
 
-`#scroll-track` is an empty 700vh block (520vh under 720px). Sequence progress
-is the scroll position measured against **that element's own scrollable span**,
-not `lenis.progress` — there is a full page of content after the track, so
-document progress would never reach 1.0 while the sequence was still on screen
-and the last frames would be unreachable.
+Canvases are sized by `devicePixelRatio` capped at 2, re-laid out on a debounced
+`ResizeObserver`.
 
-Progress 0→1 maps linearly onto frame 0→49. Verified: at scroll fractions
-0/.25/.5/.75/1 the frame position lands exactly on 0 / 12.25 / 24.5 / 36.75 / 49.
+## Things that will bite you
 
-Overlay copy blocks declare their own range via `data-start` / `data-end` in
-the HTML; `main.js` flattens those into typed arrays at boot so the scroll
-handler does no `parseFloat`, no attribute reads, and no allocation.
+- **Never put `overflow-x: hidden` on `html`/`body`.** It forces `overflow-y` to
+  compute to `auto`, which makes them scroll containers and silently kills
+  `position: sticky` on the pin — the whole scene then scrolls past instead of
+  the sequence scrubbing in place, with no error anywhere. Use `overflow-x:
+  clip`: it clips identically but pairs with `visible`, so no scroll container
+  is created. Assert on it with `getComputedStyle(html).overflowY === 'visible'`
+  and by checking the pin's `getBoundingClientRect().top` stays 0 while
+  scrolling.
+- **Don't gate the preloader purely on image events.** A hidden or never-painted
+  tab can finish an image without dispatching `load`, and `img.decode()` there
+  may never settle at all — either one strands the loader at 0% forever. The
+  queue gates on `decode()` only while visible and polls `img.complete` as a
+  backstop.
+- **The overlay gate.** Beats live in a sticky pin and progress pins at 1, so
+  without the explicit `rect.bottom <= vh` check the last beat hangs over the
+  content sections forever. Do not remove it.
+- **Don't read `lenis.scroll` outside Lenis's own rAF.** It only advances when
+  `lenis.raf()` runs, so it reads 0 anywhere else — that silently pinned the
+  progress bar at `scaleX(0)`. Page-level scroll reads use `window.scrollY`.
+- **CSS must not transition anything JS writes per frame** — beat
+  opacity/transform, canvas size, the progress bar's `scaleX`. It fights the
+  rAF loop.
+- **`.beat` inline styles.** JS owns `opacity` and `transform` on every beat, so
+  `.beat--center` is centred with `left/right` + padding, never `translateX`.
+- **Verifying in a hidden tab is meaningless.** rAF is throttled to ~nothing
+  when the browser pane isn't compositing, so `await requestAnimationFrame`
+  never resolves and canvas timings are fiction. Drive `window.rowHaus.update()`
+  synchronously and assert on state (frame index, pixel signatures, rects)
+  instead.
 
-## Performance notes
+`window.rowHaus = { seq, lenis, update }` is exposed deliberately for exactly
+that kind of state-based verification.
 
-- **Preload is gated.** Scroll is locked until all 50 frames settle. Frame 0
-  loads first and paints immediately so the hero is never blank.
-- **7 parallel loaders.** The counter tracks *settled* (loaded **or** failed)
-  frames, so a dead JPG can't hang the loading UI at 98%.
-- **`createImageBitmap`** where available — draws considerably cheaper than an
-  `HTMLImageElement`. Falls back to the element on `SecurityError` (`file://`).
-- **`decode()` is raced against `onload`, not chained.** In a background tab
-  Chromium defers decoding indefinitely, so `decode().catch(...)` never settles
-  and the preload stalls at 0% until the tab is focused.
-- **Dirty-flag draw loop.** `setProgress` only stores and marks dirty; a single
-  rAF decides when to paint. Sub-frame moves smaller than one 8-bit alpha step
-  are skipped entirely.
-- **Per-draw cost is not reliably measurable from an automated browser.** The
-  context is created `desynchronized`, and in a tab that isn't compositing the
-  draw commands queue without being flushed — timings there swing between
-  ~15 ms and ~0.08 ms for identical work, and 0.08 ms is far too fast for a
-  3 MP scaled `drawImage` to have actually happened. Earlier revisions of this
-  file quoted figures from that setup; they were measuring queueing, not
-  rendering. Judge smoothness by scrolling it in a real browser, or profile
-  with DevTools on a visible tab.
-- **DPR is capped at 2.** A 3× backing store on a fullscreen canvas is wasted
-  fill rate.
-- **The hero stage is retired** (`visibility: hidden`) once content has fully
-  covered it, so a full-viewport composited layer isn't kept alive while the
-  user reads.
-- **Memory is the real constraint, and it is arithmetic rather than measured:**
-  120 × 720×1280 RGBA ≈ **442 MB** of decoded bitmaps. Decoded size is set by
-  pixel count, so the WebP switch cut transfer, not memory.
-- Narrow viewports (≤720 px) therefore load a **strided half-set — 60 frames,
-  ≈221 MB**. See `frameFileIndex` in `js/main.js`: it maps sequence index to
-  file index hitting both endpoints exactly, so progress 0 is frame 1 and
-  progress 1 is frame 120 at either stride. A naive `i * 2` would leave the
-  final frame unreachable.
-- Transfer is 12.1 MB for the frame set. It is a gated preload, so it costs
-  time-to-interactive on a slow connection — the levers are frame count and
-  WebP quality in the extraction step, not anything at runtime.
-- If memory ever needs to come down, drop the frame count; the crossfade
-  interpolates between frames, so the fall-off in perceived smoothness is much
-  gentler than the linear saving in memory.
+## Note on the source frames
 
-## Frame provenance
-
-The frames are re-extracted from `Downloads/make_it_a_little_more_realistc.mp4`
-(720×1280, 24fps, 10.0s, 240 frames) — the original clip. **720×1280 is the
-ceiling for this footage; there is no higher-resolution master.**
-
-Sets exported through ezgif measure **35.8 dB PSNR** against the original —
-visible generational loss on top of an already small source. The current set is
-**120 frames** sampled evenly across all 240, encoded straight from lossless PNG
-to **WebP q88 ≈ 41.5–42 dB** (≈98 KB each, 12.1 MB total). No sharpening is
-applied; the goal is fidelity to the source.
-
-**Beware of resampled exports.** A 300-frame ezgif set of this clip is not 300
-distinct frames — it is the 240-frame source pushed to 30fps, so every 5th frame
-is a duplicate. The tell is a periodic collapse in the frame-to-frame difference:
-58 near-identical consecutive pairs, with the minima landing on an exact 5-frame
-period. More files, no more information, and a subtle stutter if used as-is.
-240 is the ceiling.
-
-To regenerate at a different count or quality, extract with ffmpeg and re-encode
-— `imageio-ffmpeg` provides a static binary if ffmpeg isn't on PATH.
-
-## The fit
-
-Two separate problems, two separate mechanisms.
-
-**Framing.** The boat sits below the midline, so a centered crop on a landscape
-window lands on empty water with the subject cut off. `_computeRect` takes a
-**focus-anchored cover**: `focusY: 0.56` slides the crop window down. Only an
-overflowing axis uses the anchor; a letterboxed axis always re-centers.
-
-**Resolution.** A 1512×900 window at DPR 1.5 is a 2253×1350 backing store, so a
-full-bleed cover asks for a **3.13× upscale** of a 720px-wide source. Nothing
-survives that — it was the real cause of the footage looking mushy. So:
-
-- `maxUpscale: 1.6` caps the sharp layer at a mild, still-crisp enlargement.
-- Whatever it no longer reaches is filled by `#seq-backdrop`, a second canvas
-  carrying a cover-fit copy of the same frame, blurred past legibility in CSS.
-- The butt-join between the two would read as a video dropped in a box, so
-  `_applyFeather` erases the sharp layer's edges with cached `destination-out`
-  gradients (~22% of the panel width) and it dissolves into the blur.
-
-The backdrop canvas is laid out at **192 px and transform-scaled up**, not
-stretched to 100%. A CSS filter is evaluated in the element's own coordinate
-space, so `blur(7px)` on a small box costs a fraction of the same visual result
-computed across the full viewport.
-
-This is adaptive, not a desktop special-case. Phones never see it: at 390×844
-DPR 2 the cover scale is 1.32×, under the cap, so the frame covers edge to edge
-and neither the backdrop nor the feather engages.
-
-## Gotchas
-
-- **Overlays are `position: fixed` and progress pins at 1.** Without gating,
-  the final beat hangs over the content sections forever. `applyScroll` forces
-  every overlay off once `y > trackEnd`.
-- **Verifying in an automated browser:** a tab driven headlessly reports
-  `document.hidden === true` and rAF stops firing, so screenshots show stale
-  paints and `_drawnProgress` freezes. That's the engine correctly deferring
-  work, not a bug. Assert against `_progress` / DOM state, or front the tab.
-- **Reduced motion** keeps the sequence (it only moves when the user moves) but
-  drops the looping scroll cue, the overlay translate, and all reveals, and
-  hands scrolling back to the browser with `lerp: 1` + `smoothWheel: false`.
+`frames/` is a 300-frame ezgif export. The underlying clip is 240 frames at
+24fps; a 300-frame export of it is that source resampled to 30fps, which makes
+roughly every fifth frame a near-duplicate of its neighbour. All 300 are
+preloaded and mapped as-is, by request. If the motion ever looks like it hitches
+on a regular period, that resampling is why — not the scroll engine.

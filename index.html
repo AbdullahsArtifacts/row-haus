@@ -1,268 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="is-loading">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ROW Haus — Indoor rowing, in unison</title>
-<meta name="description" content="An indoor rowing studio in Bergen. Long pieces, called rates, one boat. Scroll-driven image sequence.">
-<meta name="theme-color" content="#050d10">
-<link rel="preload" as="image" href="frames/frame-001.webp">
-<link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/sections.css">
+<title>ROW Haus — Indoor Rowing Studio</title>
+<meta name="description" content="ROW Haus is an indoor rowing studio in Oslo. One boat, one rhythm, forty-five minutes on the water.">
+<meta name="theme-color" content="#070d10">
+<link rel="stylesheet" href="css/styles.css?v=3">
+<link rel="stylesheet" href="css/sections.css?v=3">
 </head>
-<body id="top">
+<body>
 
-  <!-- ============ preloader ============ -->
-  <div id="preloader" role="status" aria-live="polite" aria-label="Loading sequence">
-    <div class="preloader-inner">
-      <span class="preloader-mark">ROW HAUS</span>
-      <div class="preloader-meter">
-        <p class="preloader-label">Loading sequence</p>
-        <div class="preloader-track"><div id="preloader-bar"></div></div>
-        <span id="preloader-pct">0%</span>
-      </div>
-    </div>
+<div id="loader">
+  <div class="loader__inner">
+    <span class="loader__mark">ROW HAUS</span>
+    <div class="loader__track"><div id="loader-bar"></div></div>
+    <p class="loader__meta"><span id="loader-pct">0</span>%</p>
   </div>
+</div>
 
-  <!-- ============ canvas ============ -->
-  <div class="canvas-stage">
-    <div class="stage-backdrop" aria-hidden="true"><canvas id="seq-backdrop"></canvas></div>
-    <canvas id="sequence-canvas" role="img"
-      aria-label="A crew of rowers moves a wooden boat through a narrow Norwegian fjord between sheer cliffs, oars entering and lifting in unison as the still teal water opens into a wide calm lake beneath snow-capped mountains."></canvas>
-    <div class="stage-scrim" aria-hidden="true"></div>
-    <div class="stage-grain" aria-hidden="true"></div>
-  </div>
+<div id="scroll-progress"></div>
 
-  <!-- ============ header ============ -->
-  <header class="site-header" id="site-header">
-    <a class="wordmark" href="#top">
-      <span class="wordmark-mark">ROW HAUS</span>
-      <span class="wordmark-sub">Indoor rowing, in unison</span>
-    </a>
-    <nav class="header-nav" aria-label="Primary">
-      <a href="#classes">Formats</a>
-      <a href="#membership">Membership</a>
-      <a class="header-cta" href="#join">Book a seat</a>
-    </nav>
-    <span class="header-meta">Bergen Wharf &middot; 24 seats &middot; Book by app</span>
-  </header>
+<header class="site-header">
+  <a class="wordmark" href="#top">ROW<span>HAUS</span></a>
+  <nav class="site-nav" aria-label="Primary">
+    <a href="#method">Method</a>
+    <a href="#classes">Classes</a>
+    <a href="#membership">Membership</a>
+    <a href="#studio">Studio</a>
+  </nav>
+  <a class="btn btn--ghost" href="#membership">Book a seat</a>
+</header>
 
-  <!-- ============ overlay copy ============ -->
-  <div class="overlay overlay--left" data-start="0" data-end="0.12">
-    <div class="overlay-inner">
-      <p class="eyebrow">Before the first stroke</p>
-      <h1 class="headline">Still water, and a long way to go</h1>
-    </div>
-  </div>
+<main id="top">
 
-  <div class="overlay overlay--right" data-start="0.16" data-end="0.30">
-    <div class="overlay-inner">
-      <p class="eyebrow">The catch</p>
-      <h2 class="headline">Eight bodies find one rhythm</h2>
-    </div>
-  </div>
+  <section id="scene" aria-label="The crossing">
+    <div class="scene__pin">
+      <canvas id="seq-blur" aria-hidden="true"></canvas>
+      <canvas id="seq-canvas" aria-hidden="true"></canvas>
+      <div class="scene__vignette" aria-hidden="true"></div>
 
-  <div class="overlay overlay--center" data-start="0.35" data-end="0.50">
-    <div class="overlay-inner">
-      <p class="eyebrow">Unison</p>
-      <h2 class="headline">Nobody pulls harder than the boat allows</h2>
-    </div>
-  </div>
-
-  <div class="overlay overlay--left" data-start="0.55" data-end="0.72">
-    <div class="overlay-inner">
-      <p class="eyebrow">The long middle</p>
-      <h2 class="headline">The work is holding the pace, not finding it</h2>
-    </div>
-  </div>
-
-  <div class="overlay overlay--right" data-start="0.78" data-end="1">
-    <div class="overlay-inner">
-      <p class="eyebrow">Open water</p>
-      <h2 class="headline">Move as one, and the distance gives way</h2>
-    </div>
-  </div>
-
-  <!-- ============ scroll cue + progress ============ -->
-  <div id="scroll-cue">
-    <span class="scroll-cue-label">Scroll</span>
-    <span class="scroll-cue-line"></span>
-  </div>
-
-  <div class="seq-progress" aria-hidden="true">
-    <div class="seq-progress-bar" id="seq-progress-bar"></div>
-  </div>
-
-  <!-- ============ scroll length ============ -->
-  <div id="scroll-track"></div>
-
-  <!-- ============ content ============ -->
-  <main class="content" id="content">
-
-    <!-- ---- stats ---- -->
-    <section class="stats" aria-label="By the numbers">
-      <div class="stats-inner">
-        <div class="stat reveal"><span class="stat-num">420</span><span class="stat-label">Members</span></div>
-        <div class="stat reveal"><span class="stat-num">31</span><span class="stat-label">Classes per week</span></div>
-        <div class="stat reveal"><span class="stat-num">24</span><span class="stat-label">Ergs on the floor</span></div>
-        <div class="stat reveal"><span class="stat-num">1.9M</span><span class="stat-label">Metres rowed this year</span></div>
-      </div>
-    </section>
-
-    <!-- ---- classes ---- -->
-    <section class="classes" id="classes">
-      <header class="section-head reveal">
-        <p class="eyebrow">The formats</p>
-        <h2 class="section-title">Three ways to sit the boat.</h2>
-        <p class="section-intro">Every class is scored, every seat is the same seat.</p>
-      </header>
-      <div class="class-grid">
-
-        <article class="class-card reveal">
-          <div class="class-card-top">
-            <h3 class="class-name">Steady State</h3>
-            <span class="class-dur">50 min</span>
-          </div>
-          <p class="class-desc">Long continuous pieces at a rate you can hold to the end.</p>
-          <ul class="class-specs">
-            <li>Rate 20 to 22</li>
-            <li>Zero sprint work</li>
-            <li>Talk-test pacing</li>
-          </ul>
-          <span class="class-index">01</span>
-        </article>
-
-        <article class="class-card reveal">
-          <div class="class-card-top">
-            <h3 class="class-name">Intervals</h3>
-            <span class="class-dur">45 min</span>
-          </div>
-          <p class="class-desc">Timed pieces with short rest, run against your own split.</p>
-          <ul class="class-specs">
-            <li>500m repeats</li>
-            <li>Split held under 2:00</li>
-            <li>Rate 26 to 30</li>
-          </ul>
-          <span class="class-index">02</span>
-        </article>
-
-        <article class="class-card reveal">
-          <div class="class-card-top">
-            <h3 class="class-name">The Eight</h3>
-            <span class="class-dur">60 min</span>
-          </div>
-          <p class="class-desc">Full-room synchronized rowing, one rate called for all boats.</p>
-          <ul class="class-specs">
-            <li>Crew scored as one</li>
-            <li>Called stroke rate</li>
-            <li>No leaderboard</li>
-          </ul>
-          <span class="class-index">03</span>
-        </article>
-
-      </div>
-    </section>
-
-    <!-- ---- membership ---- -->
-    <section class="membership" id="membership">
-      <header class="section-head reveal">
-        <p class="eyebrow">Membership</p>
-        <h2 class="section-title">Three ways in.</h2>
-      </header>
-      <div class="tier-grid">
-
-        <article class="tier reveal">
-          <h3 class="tier-name">Off-Peak</h3>
-          <p class="tier-price"><span class="tier-amount">$89</span><span class="tier-per">/mo</span></p>
-          <p class="tier-desc">Weekday classes before 3pm, for people with quiet mornings.</p>
-          <ul class="tier-feats">
-            <li>8 classes per month</li>
-            <li>Weekdays before 3pm</li>
-            <li>Erg data stored</li>
-            <li>Cancel any month</li>
-          </ul>
-          <a class="tier-cta" href="#join">Join</a>
-        </article>
-
-        <article class="tier is-featured reveal">
-          <span class="tier-badge">Most taken</span>
-          <h3 class="tier-name">Full Crew</h3>
-          <p class="tier-price"><span class="tier-amount">$169</span><span class="tier-per">/mo</span></p>
-          <p class="tier-desc">Unlimited classes, any hour the doors are open.</p>
-          <ul class="tier-feats">
-            <li>Unlimited classes</li>
-            <li>Priority seat booking</li>
-            <li>Quarterly 2k test</li>
-            <li>Guest pass each month</li>
-          </ul>
-          <a class="tier-cta" href="#join">Join</a>
-        </article>
-
-        <article class="tier reveal">
-          <h3 class="tier-name">Stroke Seat</h3>
-          <p class="tier-price"><span class="tier-amount">$310</span><span class="tier-per">/mo</span></p>
-          <p class="tier-desc">Everything in Full Crew, plus coaching built around your own splits.</p>
-          <ul class="tier-feats">
-            <li>Everything in Full Crew</li>
-            <li>Monthly 1-to-1 coaching</li>
-            <li>Written training plan</li>
-            <li>Off-hours erg access</li>
-          </ul>
-          <a class="tier-cta" href="#join">Join</a>
-        </article>
-
-      </div>
-    </section>
-
-    <!-- ---- closing CTA ---- -->
-    <section class="closer" id="join">
-      <div class="closer-inner reveal">
-        <p class="eyebrow">First seat</p>
-        <p class="closer-statement">Come once, sit in the boat, decide after.</p>
-        <a class="closer-cta" href="#top">Book a seat</a>
-        <p class="closer-note">First class is free. No card, no contract.</p>
-      </div>
-    </section>
-
-    <!-- ---- footer ---- -->
-    <footer class="site-footer">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <span class="footer-mark">ROW HAUS</span>
-          <p class="footer-tag">Indoor rowing, in unison.</p>
+      <div class="scene__overlays">
+        <div class="beat beat--center" data-from="0.02" data-to="0.18">
+          <h1 class="beat__title">ROW<span class="beat__thin">HAUS</span></h1>
+          <p class="beat__sub">Indoor rowing. Open water discipline.</p>
         </div>
-        <div class="footer-col">
-          <p class="footer-col-title">Studio</p>
-          <p class="footer-line">118 Tryggvason Wharf</p>
-          <p class="footer-line">Bergen, Norway 5003</p>
+
+        <div class="beat beat--left" data-from="0.22" data-to="0.40">
+          <p class="beat__label">01 — The catch</p>
+          <p class="beat__line">Everything starts<br>from the legs.</p>
         </div>
-        <div class="footer-col">
-          <p class="footer-col-title">Hours</p>
-          <p class="footer-line">Mon&ndash;Fri 05:30&ndash;21:00</p>
-          <p class="footer-line">Sat&ndash;Sun 07:00&ndash;16:00</p>
+
+        <div class="beat beat--right" data-from="0.44" data-to="0.62">
+          <p class="beat__label">02 — The drive</p>
+          <p class="beat__line">Eight bodies.<br>One stroke rate.</p>
         </div>
-        <div class="footer-col">
-          <p class="footer-col-title">Contact</p>
-          <a class="footer-line footer-link" href="mailto:seats@rowhaus.no">seats@rowhaus.no</a>
-          <a class="footer-line footer-link" href="tel:+4755904120">+47 55 90 41 20</a>
+
+        <div class="beat beat--left" data-from="0.66" data-to="0.84">
+          <p class="beat__label">03 — The finish</p>
+          <p class="beat__line">You don't race<br>the person beside you.</p>
         </div>
-        <div class="footer-col">
-          <p class="footer-col-title">Follow</p>
-          <a class="footer-line footer-link" href="#">Instagram</a>
-          <a class="footer-line footer-link" href="#">Strava</a>
-          <a class="footer-line footer-link" href="#">Newsletter</a>
+
+        <div class="beat beat--center" data-from="0.88" data-to="1">
+          <p class="beat__line beat__line--big">Forty-five minutes<br>on the water.</p>
+          <a class="btn btn--solid" href="#classes">See the classes</a>
         </div>
       </div>
-      <div class="footer-base">
-        <span>&copy; 2026 ROW Haus</span>
-        <span>Built to run offline</span>
+
+      <div class="scene__hint" aria-hidden="true"><span>Scroll</span></div>
+    </div>
+  </section>
+
+  <section id="method" class="section section--method">
+    <div class="section__head">
+      <p class="eyebrow">The method</p>
+      <h2>A boat only moves<br>when it moves together.</h2>
+      <p class="lede">We train the stroke before we train the number. Every seat in the
+        room is on the same rate, and the room only goes as fast as its slowest catch.
+        That constraint is the whole point.</p>
+    </div>
+    <ol class="method-grid">
+      <li>
+        <span class="method-grid__num">01</span>
+        <h3>Set the rate</h3>
+        <p>Ten minutes of low-rate work at 18–20 spm. No screens, no split times —
+          just the sequence: legs, body, arms.</p>
+      </li>
+      <li>
+        <span class="method-grid__num">02</span>
+        <h3>Hold the line</h3>
+        <p>Intervals built on consistency, not peaks. If your third piece is faster
+          than your first, you started too slow.</p>
+      </li>
+      <li>
+        <span class="method-grid__num">03</span>
+        <h3>Load the land</h3>
+        <p>Twelve minutes off the erg. Hinge, pull, carry — the posture that keeps
+          the last five hundred metres honest.</p>
+      </li>
+      <li>
+        <span class="method-grid__num">04</span>
+        <h3>Come down</h3>
+        <p>Breath work and thoracic mobility in the dark, with the fjord still
+          running on the wall.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="classes" class="section section--classes">
+    <div class="section__head">
+      <p class="eyebrow">Classes</p>
+      <h2>Three ways<br>to cross.</h2>
+    </div>
+    <div class="class-list">
+      <article class="class-card">
+        <header>
+          <h3>Crossing</h3>
+          <p class="class-card__meta">45 min · Moderate</p>
+        </header>
+        <p>The signature session. A long steady piece bookended by technical work.
+          Built for people who want to finish able to speak in full sentences.</p>
+        <p class="class-card__foot">Mon–Fri · 06:15, 07:30, 17:00, 18:15</p>
+      </article>
+      <article class="class-card class-card--hard">
+        <header>
+          <h3>Headwind</h3>
+          <p class="class-card__meta">50 min · Hard</p>
+        </header>
+        <p>Rate ladders and short bridges at threshold. The room runs silent for the
+          last four minutes. Two years of rowing or a coach's nod to enter.</p>
+        <p class="class-card__foot">Tue &amp; Thu · 06:15, 18:15 · Sat · 09:00</p>
+      </article>
+      <article class="class-card">
+        <header>
+          <h3>Stillwater</h3>
+          <p class="class-card__meta">35 min · Easy</p>
+        </header>
+        <p>Low rate, long recovery, no leaderboard. For first sessions, rest days,
+          and the week after a race.</p>
+        <p class="class-card__foot">Daily · 12:00 · Sun · 10:00, 11:15</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="membership" class="section section--membership">
+    <div class="section__head">
+      <p class="eyebrow">Membership</p>
+      <h2>No contracts.<br>No joining fee.</h2>
+    </div>
+    <div class="tiers">
+      <article class="tier">
+        <h3>Drop-in</h3>
+        <p class="tier__price">kr 245<span>/ class</span></p>
+        <ul>
+          <li>Any class, any time</li>
+          <li>Shoes and towel included</li>
+          <li>Valid twelve months</li>
+        </ul>
+        <a class="btn btn--ghost" href="#studio">Book once</a>
+      </article>
+      <article class="tier tier--featured">
+        <p class="tier__flag">Most taken</p>
+        <h3>Crew</h3>
+        <p class="tier__price">kr 1 190<span>/ month</span></p>
+        <ul>
+          <li>Eight classes a month</li>
+          <li>Seat held until five minutes prior</li>
+          <li>Quarterly 2k test and stroke review</li>
+          <li>Pause any month, twice a year</li>
+        </ul>
+        <a class="btn btn--solid" href="#studio">Join the crew</a>
+      </article>
+      <article class="tier">
+        <h3>Open water</h3>
+        <p class="tier__price">kr 1 690<span>/ month</span></p>
+        <ul>
+          <li>Unlimited classes</li>
+          <li>Two guest passes a month</li>
+          <li>Erg access outside class hours</li>
+          <li>Summer sculling on the Oslofjord</li>
+        </ul>
+        <a class="btn btn--ghost" href="#studio">Go unlimited</a>
+      </article>
+    </div>
+  </section>
+
+  <section id="studio" class="section section--studio">
+    <div class="studio-grid">
+      <div>
+        <p class="eyebrow">The studio</p>
+        <h2>Twenty-four seats,<br>one window.</h2>
+        <p class="lede">A former boat shed on the water at Sørenga. Concrete, oak,
+          and a five-metre screen that runs the crossing while you row it.</p>
       </div>
-    </footer>
+      <dl class="studio-facts">
+        <div><dt>Address</dt><dd>Sørengkaia 42<br>0194 Oslo, Norway</dd></div>
+        <div><dt>Hours</dt><dd>Mon–Fri 05:45–21:00<br>Sat–Sun 08:00–15:00</dd></div>
+        <div><dt>Contact</dt><dd>hei@rowhaus.no<br>+47 22 00 41 60</dd></div>
+        <div><dt>First session</dt><dd>Arrive fifteen minutes early.<br>Bring nothing.</dd></div>
+      </dl>
+    </div>
+    <p class="studio-close">The water doesn't care how your week went.</p>
+  </section>
 
-  </main>
+</main>
 
-  <script src="lib/lenis.min.js"></script>
-  <script src="js/sequence.js"></script>
-  <script src="js/main.js"></script>
+<footer class="site-footer">
+  <span class="wordmark wordmark--sm">ROW<span>HAUS</span></span>
+  <p>Sørengkaia 42, Oslo · hei@rowhaus.no</p>
+  <p class="site-footer__fine">© 2026 ROW Haus AS</p>
+</footer>
+
+<script src="lib/lenis.min.js"></script>
+<script src="js/sequence.js?v=3"></script>
+<script src="js/main.js?v=3"></script>
 </body>
 </html>
