@@ -1,0 +1,13 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python (build-single-file.py)
+__pycache__/
+*.py[cod]
+
+# Build output — the bundled single-file page is generated, not source.
+# Regenerate with: python build-single-file.py
+rowing.html
+_verify*.html
